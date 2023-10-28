@@ -1,0 +1,78 @@
+CREATE TABLE actors(
+	actor_id INTEGER PRIMARY KEY AUTOINCREMENT,
+	name TEXT NOT NULL,
+	surname TEXT NOT NULL,
+	age INTEGER CHECK (age>=5 AND age<=99)NOT NULL,
+	movie TEXT,
+	budget REAL DEFAULT 100000,
+	manager TEXT,
+	release INTEGER,
+	sex TEXT CHECK (sex="m" OR sex="f") NOT NULL
+);
+
+INSERT INTO actors (name,surname,age,movie,budget,manager,release,sex)
+VALUES ("Tom","Cruse",50,"mission impossible", 51000000,"Mark", 2000,"m"),
+("Tom","Cruse",50,"mission impossible 2", 51000000,"Mark", 2001,"m"),
+("Tom","Cruse",50,"mission impossible 3", 110000000,"Mark", 2001,"m"),
+("Tom","Cruse",50,"Jack Richer", 510000000,"Mark", 2014,"m"),
+("Tom","Cruse",50,"Jack Richer 2", 650000000,"Mark", 2017,"m"),
+("Arnold","Swartsneeger",50,"terminator", 11000000,"Alex", 1990,"m"),
+("Arnold","Swartsneeger",70,"terminator 2", 51000000,"Alex", 1992,"m"),
+("Kate","Winslet",50,"Titanic", 110000000,"Zaker", 2001,"f"),
+("Kate","Winslet",50,"Avatar", 1100000000,"Zaker", 2022,"f"),
+("Leonardo","Dikaprio",53,"Titanic", 110000000,"Karlos", 2001,"m"),
+("Leonardo","Dikaprio",53,"Begin", 110000000,"Karlos", 2009,"m"),
+("Sandra","Bullock",51,"Speed", 21000000,"Marta", 2000,"f"),
+("Sandra","Bullock",51,"GRAVITY", 70000000,"Marta", 2013,"f"),
+("Nicolas","Cage",59,"Lord of War", 123000000,"Lionele", 2005,"m"),
+("Tanit","Phoenix",43,"Lost Boys: The Thirst", 4400000,"Richard", 2010,"f"),
+("Cate","Blanchett",54,"Thor: Ragnarok", 180000000,"Lionele", 2017,"f")
+;
+ALTER TABLE actors ADD COLUMN finance REAL
+UPDATE actors SET finance = budget*0.13
+WHERE name="Tom"
+UPDATE actors SET finance = budget*0.145
+WHERE actor_id>=6
+ALTER TABLE actors
+RENAME COLUMN finance TO finance_actors
+INSERT INTO actors (name,surname,age,movie,budget,manager,release,sex)
+VALUES ("Jean","Reno",75,"mission impossible", 51000000,"Kolya", 2000,"m"),
+("Carroll","Hamilton",67,"terminator", 11000000,"Julia", 1990,"f"),
+("Scarlett","Johansson",38,"Thor: Ragnarok", 180000000,"Kate", 2017,"f");
+SELECT DISTINCT name, surname FROM actors
+WHERE (release>=1990 AND release<=2000)
+
+SELECT movie, name, surname FROM actors
+WHERE movie IN (
+    SELECT movie
+    FROM actors
+    GROUP BY movie
+    HAVING COUNT(*) >= 2
+)
+ORDER BY surname ASC;
+SELECT DISTINCT name,surname,sex, age FROM actors
+WHERE sex='m' AND  age>55
+SELECT name, surname
+FROM actors
+WHERE budget >= 10000000
+GROUP BY name, surname
+HAVING COUNT(movie) >= 2;
+SELECT SUM(finance_actors) AS total_fees FROM actors
+WHERE release BETWEEN 1995 AND 2005
+SELECT name,surname,movie FROM actors
+WHERE (release-(2023-age)<35)
+SELECT movie FROM actors
+WHERE movie REGEXP '\w+ '
+SELECT movie, SUM(finance_actors) AS total_fees
+FROM actors
+GROUP BY movie
+ORDER BY total_fees DESC
+LIMIT 5;
+SELECT movie FROM actors
+WHERE movie IN (
+    SELECT movie
+    FROM actors
+    GROUP BY movie
+    ORDER BY COUNT(*) DESC
+)
+LIMIT 1
