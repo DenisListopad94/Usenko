@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="C:/Users/Филипп/Desktop/PythonLessons/pythonProject1/Usenko/cinema.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="pragmas query browser structure" current="1"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="125"/><column_width id="3" width="3117"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,13:mainBank_accounts"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="Bank_accounts" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="158"/><column index="2" value="104"/><column index="3" value="90"/><column index="4" value="155"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="actors" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="90"/><column index="2" value="57"/><column index="3" value="84"/><column index="4" value="52"/><column index="5" value="52"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="actors_movies" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort><column index="3" mode="0"/></sort><column_widths><column index="1" value="162"/><column index="2" value="103"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="directors" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="104"/><column index="2" value="370"/><column index="3" value="84"/><column index="4" value="52"/><column index="5" value="52"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="movies" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort><column index="1" mode="0"/></sort><column_widths><column index="1" value="89"/><column index="2" value="244"/><column index="3" value="108"/><column index="4" value="301"/><column index="5" value="104"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="sqlite_sequence" show_row_id="0" encoding="" plot_x_axis="seq" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="114"/><column index="2" value="52"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes><y_axis name="_rowid_" line_style="1" point_shape="5" colour="#004586" active="1"/><y_axis name="seq" line_style="1" point_shape="5" colour="#ff420e" active="1"/><y2_axis name="seq" line_style="1" point_shape="5" colour="#ffd320" active="1"/></plot_y_axes><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">ALTER TABLE Bank_accounts
+ADD COLUMN finance INTEGER DEFAULT NULL
+SELECT movies.budjet, directors.name,directors.surname FROM movies
+JOIN directors ON directors.director_id= movies.director_id
+GROUP BY directors.surname
+ORDER BY budjet DESC
+LIMIT 10
+
+SELECT actors.name, actors.surname FROM actors
+LEFT JOIN actors_movies ON actors_movies.actors_id = actors.actors_id
+WHERE actors_movies.actors_movies_id IS NULL
+UNION
+SELECT directors.name,	directors.surname FROM directors
+LEFT JOIN movies ON  directors.director_id = movies.director_id
+WHERE movies.director_id IS NULL
+
+SELECT movies.name_movies, actors.name, actors.surname FROM movies
+JOIN actors_movies ON  movies.movie_id = actors_movies.movies_id
+JOIN actors ON actors_movies.actors_id=actors.actors_id
+WHERE movies.budjet&gt;150000000
+
+SELECT directors.name,directors.surname FROM directors
+JOIN movies ON directors.director_id = movies.director_id
+WHERE movies.release&lt;=2000
+GROUP BY directors.name,directors.surname
+
+UPDATE actors_movies
+SET actors_id = 2
+WHERE actors_movies_id= 23;
+UPDATE actors_movies
+SET actors_id = 11
+WHERE actors_movies_id = 26;
+INSERT INTO directors (name,surname,age,sex)
+VALUES (&quot;Tom&quot;,&quot;Hancks&quot;, 67,&quot;m&quot;)
+UPDATE movies
+SET director_id = 19
+WHERE movie_id = 14
+ALTER TABLE movies ADD COLUMN rating REAL CHECK (rating&gt;=0.1 and rating&lt;=10.0) NOT NULL DEFAULT 6
+UPDATE movies SET rating = 0.1 + (abs(random()) % 10000) / 1000.0;
+SELECT movies.name_movies,directors.name,directors.surname FROM movies
+JOIN directors ON movies.director_id=directors.director_id
+WHERE movies.rating&gt;=5 AND movies.release&lt;=2000
+UPDATE bank_accounts
+SET finance = (
+  SELECT 
+    CASE
+      WHEN SUM(movies.budjet) &gt; 150000000 THEN SUM(movies.budjet) * 0.2
+      WHEN SUM(movies.budjet) BETWEEN 100000000 AND 150000000 THEN SUM(movies.budjet) * 0.15
+      ELSE SUM(movies.budjet) * 0.1
+    END
+  FROM movies 
+  JOIN actors_movies ON movies.movie_id = actors_movies.movies_id
+  WHERE actors_movies.actors_id = bank_accounts.actors_id
+);
+SELECT actors.name, actors.surname FROM actors
+JOIN Bank_accounts ON actors.actors_id=Bank_accounts.actors_id
+ORDER BY Bank_accounts.finance DESC
+LIMIT 5
+SELECT a.name, a.surname
+FROM actors a
+WHERE (
+  SELECT COUNT(*)
+  FROM actors_movies am
+  WHERE am.actors_id = a.actors_id
+) = 1;
+
+SELECT d.name, d.surname
+FROM directors d
+WHERE (
+  SELECT COUNT(*)
+  FROM movies m
+  WHERE m.director_id = d.director_id
+) = 1;
+</sql><current_tab id="0"/></tab_sql></sqlb_project>

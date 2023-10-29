@@ -1,0 +1,73 @@
+ALTER TABLE Bank_accounts
+ADD COLUMN finance INTEGER DEFAULT NULL
+SELECT movies.budjet, directors.name,directors.surname FROM movies
+JOIN directors ON directors.director_id= movies.director_id
+GROUP BY directors.surname
+ORDER BY budjet DESC
+LIMIT 10
+
+SELECT actors.name, actors.surname FROM actors
+LEFT JOIN actors_movies ON actors_movies.actors_id = actors.actors_id
+WHERE actors_movies.actors_movies_id IS NULL
+UNION
+SELECT directors.name,	directors.surname FROM directors
+LEFT JOIN movies ON  directors.director_id = movies.director_id
+WHERE movies.director_id IS NULL
+
+SELECT movies.name_movies, actors.name, actors.surname FROM movies
+JOIN actors_movies ON  movies.movie_id = actors_movies.movies_id
+JOIN actors ON actors_movies.actors_id=actors.actors_id
+WHERE movies.budjet>150000000
+
+SELECT directors.name,directors.surname FROM directors
+JOIN movies ON directors.director_id = movies.director_id
+WHERE movies.release<=2000
+GROUP BY directors.name,directors.surname
+
+UPDATE actors_movies
+SET actors_id = 2
+WHERE actors_movies_id= 23;
+UPDATE actors_movies
+SET actors_id = 11
+WHERE actors_movies_id = 26;
+INSERT INTO directors (name,surname,age,sex)
+VALUES ("Tom","Hancks", 67,"m")
+UPDATE movies
+SET director_id = 19
+WHERE movie_id = 14
+ALTER TABLE movies ADD COLUMN rating REAL CHECK (rating>=0.1 and rating<=10.0) NOT NULL DEFAULT 6
+UPDATE movies SET rating = 0.1 + (abs(random()) % 10000) / 1000.0;
+SELECT movies.name_movies,directors.name,directors.surname FROM movies
+JOIN directors ON movies.director_id=directors.director_id
+WHERE movies.rating>=5 AND movies.release<=2000
+UPDATE bank_accounts
+SET finance = (
+  SELECT
+    CASE
+      WHEN SUM(movies.budjet) > 150000000 THEN SUM(movies.budjet) * 0.2
+      WHEN SUM(movies.budjet) BETWEEN 100000000 AND 150000000 THEN SUM(movies.budjet) * 0.15
+      ELSE SUM(movies.budjet) * 0.1
+    END
+  FROM movies
+  JOIN actors_movies ON movies.movie_id = actors_movies.movies_id
+  WHERE actors_movies.actors_id = bank_accounts.actors_id
+);
+SELECT actors.name, actors.surname FROM actors
+JOIN Bank_accounts ON actors.actors_id=Bank_accounts.actors_id
+ORDER BY Bank_accounts.finance DESC
+LIMIT 5
+SELECT a.name, a.surname
+FROM actors a
+WHERE (
+  SELECT COUNT(*)
+  FROM actors_movies am
+  WHERE am.actors_id = a.actors_id
+) = 1;
+
+SELECT d.name, d.surname
+FROM directors d
+WHERE (
+  SELECT COUNT(*)
+  FROM movies m
+  WHERE m.director_id = d.director_id
+) = 1;
